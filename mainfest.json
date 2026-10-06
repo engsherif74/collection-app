@@ -1,0 +1,53 @@
+{
+  "name": "تحصيل مديونية العملاء",
+  "short_name": "التحصيل",
+  "description": "تطبيق تحصيل مديونية العملاء - قطاعات المنازل - يعمل بدون إنترنت",
+  "lang": "ar",
+  "dir": "rtl",
+  "id": "/collection-app/",
+  "start_url": "/collection-app/index.html",
+  "scope": "/collection-app/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0d4d4d",
+  "theme_color": "#0d4d4d",
+  "categories": ["business", "finance", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/collection-app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/collection-app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/collection-app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/collection-app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "لوحة الأدمن",
+      "short_name": "الأدمن",
+      "description": "فتح لوحة تحكم الأدمن",
+      "url": "/collection-app/index.html",
+      "icons": [{ "src": "/collection-app/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": []
+}
