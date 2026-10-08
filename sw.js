@@ -3,8 +3,12 @@
    للعمل بدون إنترنت
    ========================================================= */
 
-const CACHE_VERSION = 'v1.0.2';
+const CACHE_VERSION = 'v10.0.0';
+
 const CACHE_NAME = `collect-app-${CACHE_VERSION}`;
+
+
+
 const RUNTIME_CACHE = `collect-runtime-${CACHE_VERSION}`;
 
 /* الملفات الأساسية للتخزين */
