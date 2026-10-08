@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d4d4d">
+<link rel="manifest" href="/manifest.json">
+<title>تحصيل مديونية العملاء</title>
+
+<!-- مكتبات خارجية -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- خطوط -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+<!-- ============================================================
+     شاشة تسجيل الدخول
+     ============================================================ -->
+<div id="loginView">
+  <div class="loginWrap">
+    <div class="loginCard">
+      <h2>🔐 تسجيل الدخول</h2>
+      <div class="sub">اختر المستخدم وأدخل كلمة المرور</div>
+      <div id="loginErr" class="err hidden"></div>
+      <label>المستخدم</label>
+      <div class="userList" id="userList"></div>
+      <div class="field">
+        <label for="pw">كلمة المرور</label>
+        <input type="password" id="pw" autocomplete="off" placeholder="••••••••">
+      </div>
+      <button class="big ok" id="loginBtn" style="height:52px;font-size:16px">دخول</button>
+    </div>
+    <div class="devFooter" style="max-width:440px;width:100%;margin-top:0">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     واجهة العضو الرئيسية
+     ============================================================ -->
+<div id="memberView" class="hidden">
+
+  <header><div class="hrow">
+    <h1 id="ttl">تحصيل مديونية العملاء</h1>
+    <button class="hbtn" id="paperBtn">📄 عرض كصفحات</button>
+    <button class="hbtn" id="searchBtn">🔍 بحث</button>
+    <button class="hbtn" id="detBtn">📊 تفاصيل</button>
+    <button class="hbtn hidden" id="backBtn">رجوع</button>
+    <button class="hbtn" id="logoutBtn"
+            style="background:rgba(220,38,38,.4);border-color:rgba(220,38,38,.7)">
+      خروج
+    </button>
+  </div></header>
+
+  <!-- شريط الأزرار الديناميكية -->
+  <div id="dynamicBtnsBar" class="hidden"></div>
+
+  <!-- ============ v1: الواجهة الرئيسية ============ -->
+  <div id="v1">
+
+    <div id="note" class="note hidden">
+      <span id="noteT"></span>
+      <button class="red" id="noteX">إغلاق</button>
+    </div>
+
+    <!-- اختيار القطاع/البلوك/العمارة -->
+    <div class="card">
+      <div class="row3">
+        <div>
+          <label for="sec">القطاع</label>
+          <select id="sec"><option value="">اختر</option></select>
+        </div>
+        <div>
+          <label for="blk">البلوك</label>
+          <select id="blk" disabled><option value="">اختر</option></select>
+        </div>
+        <div>
+          <label for="bld">العمارة</label>
+          <select id="bld" disabled><option value="">اختر</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="msg" class="ok hidden" style="margin:12px;white-space:pre-line"></div>
+
+    <!-- جدول الشقق -->
+    <div class="card hidden" id="res">
+      <div class="sec">
+        <span>الشقق المتبقية</span>
+        <button class="link" id="allBtn">تحديد الكل</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th class="ck"></th>
+            <th style="width:12%">الشقة</th>
+            <th>اسم العميل</th>
+            <th style="width:11%">العدد</th>
+            <th style="width:17%">القيمة</th>
+            <th style="width:19%">سداد</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+        <tfoot>
+          <tr class="tot">
+            <td></td>
+            <td colspan="2">المتبقي في العمارة</td>
+            <td id="tc">0</td>
+            <td id="tv" style="direction:ltr">0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="sel" style="margin-top:12px">
+        <div class="t">مجموع الشقق المختارة</div>
+        <div class="n" id="sv">0</div>
+        <div class="s" id="ss">لم يتم اختيار شقق</div>
+        <button class="btn" id="paySelBtn" disabled>تأكيد سداد الشقق المختارة</button>
+      </div>
+    </div>
+
+    <!-- المحصّل من العمارة -->
+    <div class="card hidden" id="coll">
+      <div class="sec"><span>المحصّل من هذه العمارة</span></div>
+      <div id="collRows"></div>
+    </div>
+
+    <!-- رفع ملف البيانات المشفَّر -->
+    <div class="card">
+      <div class="sec"><span>📤 رفع ملف البيانات المشفَّر</span></div>
+      <p style="font-size:12.5px;color:var(--mu);text-align:center;margin:0 0 12px;line-height:1.7">
+        ارفع ملفاً أو أكثر من الملفات المشفَّرة التي أرسلها لك الأدمن
+        (<code>.enc.json</code>)
+      </p>
+      <input type="file" id="encFile"
+             accept=".json,application/json" multiple
+             style="padding:12px;height:auto;text-align:center">
+      <button class="big ok" id="decBtn" style="margin-top:12px">
+        🔓 فك التشفير وتحميل البيانات
+      </button>
+      <div id="decStatus" class="fileInfo hidden"></div>
+    </div>
+
+    <!-- الفوتر -->
+    <div class="devFooter">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+
+  <!-- ============ v2: صفحة التفاصيل ============ -->
+  <div id="v2" class="hidden">
+    <div style="margin:0 12px">
+
+      <button class="acc" data-a="issues">
+        <span>إجمالي المديونية حسب القطاع</span>
+        <span>▾</span>
+      </button>
+      <div class="card hidden" id="a-issues" style="margin:8px 0 0">
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:12%">قطاع</th>
+                <th>إجمالي المديونية</th>
+                <th style="width:18%">الإصدار</th>
+                <th>إجمالي المحصّل</th>
+                <th>المتبقي من الإصدار</th>
+                <th>المتبقي من المديونية</th>
+              </tr>
+            </thead>
+            <tbody id="issBody"></tbody>
+            <tfoot>
+              <tr class="tot">
+                <td>الإجمالي</td>
+                <td id="issT_tot" style="direction:ltr">0</td>
+                <td id="issT_iss" style="direction:ltr">0</td>
+                <td id="issT_col" style="direction:ltr">0</td>
+                <td id="issT_remiss" style="direction:ltr">0</td>
+                <td id="issT_remtot" style="direction:ltr">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <button class="acc" data-a="blocks">
+        <span>المتبقي في القطاعات والبلوكات والعمارات</span>
+        <span>▾</span>
+      </button>
+      <div class="card hidden" id="a-blocks" style="margin:8px 0 0">
+        <label for="secSel">اختر القطاع</label>
+        <select id="secSel" style="margin-bottom:12px">
+          <option value="">اختر</option>
+        </select>
+        <div id="secSummary" class="line sum hidden" style="margin-bottom:10px"></div>
+        <div id="blocksBody"></div>
+      </div>
+
+      <button class="acc" data-a="days">
+        <span>سجل التحصيلات اليومية</span>
+        <span>▾</span>
+      </button>
+      <div class="card hidden" id="a-days" style="margin:8px 0 0">
+        <div id="days"></div>
+      </div>
+
+      <button class="acc" data-a="outside">
+        <span>تسديدات خارج النطاق</span>
+        <span>▾</span>
+      </button>
+      <div class="card hidden" id="a-outside" style="margin:8px 0 0">
+        <div id="outsideBody"></div>
+      </div>
+
+      <button class="acc" data-a="archive">
+        <span>أرشيف الشهور</span>
+        <span>▾</span>
+      </button>
+      <div class="card hidden" id="a-archive" style="margin:8px 0 0">
+        <div id="archiveBody"></div>
+      </div>
+
+    </div>
+
+    <div class="devFooter">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+
+  <!-- ============ v3: صفحة البحث ============ -->
+  <div id="v3" class="hidden">
+    <div class="card">
+      <div class="sec"><span>🔍 البحث بالاسم</span></div>
+      <input type="text" id="searchInput"
+             placeholder="اكتب اسم العميل..."
+             style="text-align:right;padding:0 14px;margin-bottom:12px">
+      <button class="big" id="doSearchBtn">🔍 ابحث</button>
+      <div id="searchResults" style="margin-top:16px"></div>
+    </div>
+
+    <div class="devFooter">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+
+  <!-- ============ v4: الواجهة الورقية ============ -->
+  <div id="v4" class="hidden">
+    <div class="card">
+      <div class="sec">
+        <span>📄 عرض كصفحات ورقية</span>
+        <span id="paperInfo" style="font-size:12px;color:var(--mu)"></span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label for="paperSecSel">القطاع</label>
+          <select id="paperSecSel"><option value="">اختر</option></select>
+        </div>
+        <div>
+          <label for="paperPerPage">عدد في الصفحة</label>
+          <select id="paperPerPage">
+            <option value="10">10</option>
+            <option value="15" selected>15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="paperView"></div>
+
+    <div class="devFooter">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     نافذة تعديل كلمة المرور
+     ============================================================ -->
+<div id="editModal" class="modal hidden">
+  <div class="modalBox">
+    <h3>✏️ تعديل كلمة المرور</h3>
+    <div class="field">
+      <label>اسم العضو</label>
+      <input type="text" id="editName" readonly>
+    </div>
+    <div class="field">
+      <label>كلمة المرور الجديدة</label>
+      <input type="text" id="editPass" autocomplete="off">
+    </div>
+    <div class="buttons">
+      <button class="btnCancel" id="editCancel">إلغاء</button>
+      <button class="btnConfirm" id="editConfirm">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     نافذة iframe للصفحات الديناميكية
+     ============================================================ -->
+<div id="dynIframeView" class="hidden">
+  <div class="topBar">
+    <span class="title" id="dynIframeTitle">📄 صفحة</span>
+    <button class="closeBtn" id="dynIframeClose">✕ إغلاق</button>
+  </div>
+  <iframe id="dynIframe" src="" loading="lazy"></iframe>
+</div>
+
+<!-- ============================================================
+     JS
+     ============================================================ -->
+<script src="/js/shared.js"></script>
+<script src="/js/index.js"></script>
+
+</body>
+</html>

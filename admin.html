@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#d97706">
+<link rel="manifest" href="/manifest.json">
+<title>لوحة الأدمن — تحصيل المديونية</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<style>
+/* ═══ أنماط خاصة بصفحة الأدمن ═══ */
+#adminLoginView .loginCard{
+  border:2px solid var(--accent);
+  box-shadow:0 12px 40px rgba(217,119,6,.25);
+}
+#adminView header{
+  background:linear-gradient(135deg,#d97706,#b45309) !important;
+  box-shadow:0 8px 32px rgba(217,119,6,.3);
+}
+#adminView header::before{
+  background:radial-gradient(circle at 30% -20%, rgba(255,255,255,.3) 0%, transparent 60%);
+}
+.userRow{
+  display:grid;grid-template-columns:1fr auto auto;gap:10px;
+  align-items:center;padding:12px 14px;background:var(--bg-alt);
+  border-radius:12px;margin-bottom:8px;border:1px solid var(--bd);
+  transition:all .2s ease;
+}
+.userRow:hover{background:var(--card);box-shadow:var(--shadow-sm);border-color:var(--pr2)}
+.userRow .name{font-weight:800;font-size:15px;text-align:right}
+.userRow .pass{font-size:11px;color:var(--mu);direction:ltr;font-family:'Courier New',monospace;margin-top:2px;font-weight:600}
+#scopesListBox{margin-bottom:12px}
+.scopeItem{
+  background:linear-gradient(135deg,var(--soft),var(--soft2));
+  border:1.5px solid var(--pr2);border-radius:12px;padding:12px 14px;
+  margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+}
+.scopeItem .scopeInfo{font-size:13px;line-height:1.8;color:var(--pr);font-weight:700}
+.scopeItem .scopeInfo .fromTo{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.scopeItem .scopeInfo .tag{
+  background:var(--card);padding:3px 8px;border-radius:6px;font-size:11.5px;
+  direction:ltr;border:1px solid var(--bd-strong);font-family:'Courier New',monospace;
+}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;direction:rtl}
+.row4>div{display:flex;flex-direction:column}
+.row4 input{height:42px;padding:0 8px;font-size:13.5px;font-weight:700;text-align:center}
+.dynBtnItem{
+  background:var(--bg-alt);border:1px solid var(--bd);border-radius:12px;
+  padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;
+  gap:10px;align-items:center;transition:all .2s ease;
+}
+.dynBtnItem:hover{background:var(--card);border-color:var(--pr2);box-shadow:var(--shadow-sm)}
+.dynBtnItem .info .name{font-weight:800;font-size:14px;color:var(--tx);margin-bottom:2px}
+.dynBtnItem .info .file{font-size:11.5px;color:var(--mu);direction:ltr;font-family:'Courier New',monospace;font-weight:600}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat>div{background:linear-gradient(135deg,var(--soft),var(--soft2));padding:12px;border-radius:10px;text-align:center;border:1px solid var(--pr2)}
+.stat .t{font-size:11px;color:var(--mu);font-weight:700;margin-bottom:4px}
+.stat .n{font-size:20px;font-weight:800;color:var(--pr);direction:ltr}
+@media (prefers-color-scheme:dark){.stat .n{color:var(--pr2)}}
+#previewTable{width:100%;border-collapse:collapse;font-size:12.5px}
+#previewTable thead th{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;padding:8px 4px;font-size:11.5px;font-weight:700}
+#previewTable tbody td{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:center}
+#previewTable tbody tr:nth-child(even) td{background:var(--bg-alt)}
+#previewTable tbody td:nth-child(6){text-align:right;font-weight:700}
+#previewTable tbody td:nth-child(7),#previewTable tbody td:nth-child(8){direction:ltr;font-weight:800;color:var(--pr)}
+@media (prefers-color-scheme:dark){#previewTable tbody td:nth-child(7),#previewTable tbody td:nth-child(8){color:var(--pr2)}}
+.log{background:#0f172a;color:#a5f3fc;padding:12px;border-radius:10px;font-family:'Courier New',monospace;font-size:12px;direction:ltr;text-align:left;max-height:250px;overflow-y:auto;white-space:pre-wrap;line-height:1.7;border:1px solid #1e3a5f}
+.log:empty::before{content:'لا توجد عمليات بعد...';color:#64748b;font-style:italic}
+.warnBox{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid var(--accent);border-radius:14px;padding:14px;margin:12px;text-align:center;color:#92400e;font-weight:700;font-size:13px;line-height:1.8}
+.warnBox b{display:block;font-size:15px;margin-bottom:6px;color:#78350f}
+.archivePreview{background:var(--bg-alt);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-top:12px}
+.archivePreview .memberTag{display:inline-block;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;padding:4px 12px;border-radius:20px;font-weight:800;font-size:13px;margin-bottom:10px}
+.archivePreview .row{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px dashed var(--bd);font-size:13px}
+.archivePreview .row b{color:var(--pr);direction:ltr}
+@media (prefers-color-scheme:dark){.archivePreview .row b{color:var(--pr2)}}
+#choiceModal .modalBox{max-width:480px}
+#choiceModal .infoGrid{background:linear-gradient(135deg,var(--soft),var(--soft2));border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:2;border:1px solid var(--pr2)}
+#choiceModal .infoGrid .lineRow{display:flex;justify-content:space-between;padding:4px 0}
+#choiceModal .infoGrid .lineRow b{direction:ltr;color:var(--pr)}
+#choiceModal .infoGrid hr{border:none;border-top:1px dashed var(--bd);margin:8px 0}
+@media (max-width:520px){
+  .row4{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat{grid-template-columns:repeat(2,1fr)}
+}
+#adminView #dynamicBtnsBar{background:linear-gradient(135deg,#d97706,#b45309);border-bottom:none}
+#adminView #dynamicBtnsBar .dynBtn{background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(8px)}
+#adminView #dynamicBtnsBar .dynBtn:hover{background:rgba(255,255,255,.4)}
+</style>
+</head>
+<body>
+
+<!-- شاشة دخول الأدمن -->
+<div id="adminLoginView">
+  <div class="loginWrap">
+    <div class="loginCard" style="border-color:var(--accent)">
+      <h2 style="color:var(--accent2)">👨‍💼 لوحة الأدمن</h2>
+      <div class="sub">أدخل كلمة مرور الأدمن</div>
+      <div id="adminLoginErr" class="err hidden"></div>
+      <div class="field">
+        <label for="adminPw">كلمة المرور</label>
+        <input type="password" id="adminPw" autocomplete="off" placeholder="••••••••">
+      </div>
+      <button class="big gold" id="adminLoginBtn" style="height:52px;font-size:16px">دخول</button>
+    </div>
+    <div class="devFooter" style="max-width:440px;width:100%;margin-top:0">
+      <div class="dev-label">Developed by</div>
+      <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+    </div>
+  </div>
+</div>
+
+<!-- لوحة الأدمن -->
+<div id="adminView" class="hidden">
+  <header>
+    <div class="hrow">
+      <h1>👨‍💼 لوحة تحكم الأدمن</h1>
+      <button class="hbtn" id="adminLogoutBtn">خروج</button>
+    </div>
+  </header>
+
+  <div id="dynamicBtnsBar" class="hidden"></div>
+
+  <!-- إدارة الأعضاء -->
+  <div class="card">
+    <div class="sec">
+      <span>👥 الأعضاء</span>
+      <span id="usersCount" style="color:var(--mu);font-weight:600;font-size:12px"></span>
+    </div>
+    <div id="usersListBox"></div>
+    <button class="big ok" id="showAddFormBtn" style="margin-top:12px">➕ إضافة عضو جديد</button>
+
+    <div class="addBox hidden" id="addForm">
+      <h4>➕ عضو جديد</h4>
+      <div class="row"><input type="text" id="newName" placeholder="اسم العضو" autocomplete="off"></div>
+      <div class="row"><input type="text" id="newPass" placeholder="كلمة المرور" autocomplete="off"></div>
+      <div class="row"><input type="text" id="newPass2" placeholder="تأكيد كلمة المرور" autocomplete="off"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <button class="big ok" id="confirmAddBtn">إضافة</button>
+        <button class="big danger" id="cancelAddBtn">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- النطاقات -->
+  <div class="card">
+    <div class="sec"><span>🎯 نطاقات الأعضاء</span></div>
+    <p style="font-size:12.5px;color:var(--mu);text-align:center;margin:0 0 12px">حدّد لكل عضو نطاقه (أو أكثر) بالضبط</p>
+
+    <label>اختر العضو</label>
+    <select id="scopeMemberSel" style="margin-bottom:12px"><option value="">اختر عضو...</option></select>
+
+    <div id="scopesListBox"></div>
+
+    <div class="addBox">
+      <h4>➕ إضافة نطاق جديد</h4>
+      <div style="font-size:12px;font-weight:700;color:var(--pr);margin-bottom:6px">📍 من (البداية)</div>
+      <div class="row4">
+        <div><label style="font-size:11px">قطاع</label><input type="number" id="fromSec" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">بلوك</label><input type="number" id="fromBlk" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">عمارة</label><input type="number" id="fromBld" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">شقة</label><input type="number" id="fromApt" min="1" placeholder="0"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--pr);margin:10px 0 6px">🏁 إلى (النهاية)</div>
+      <div class="row4">
+        <div><label style="font-size:11px">قطاع</label><input type="number" id="toSec" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">بلوك</label><input type="number" id="toBlk" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">عمارة</label><input type="number" id="toBld" min="1" placeholder="0"></div>
+        <div><label style="font-size:11px">شقة</label><input type="number" id="toApt" min="1" placeholder="0"></div>
+      </div>
+      <button class="big ok" id="addScopeBtn" style="margin-top:14px">✅ إضافة النطاق</button>
+    </div>
+  </div>
+
+  <!-- الأزرار الديناميكية -->
+  <div class="card">
+    <div class="sec"><span>🔘 الأزرار الديناميكية</span></div>
+    <p style="font-size:12.5px;color:var(--mu);text-align:center;margin:0 0 12px">أضف أزراراً تظهر للأعضاء — كل زر يفتح ملف HTML</p>
+
+    <div id="dynBtnsListBox"></div>
+
+    <button class="big ok" id="showDynBtnForm" style="margin-top:12px">➕ إضافة زر جديد</button>
+
+    <div class="addBox hidden" id="dynBtnForm">
+      <h4>➕ زر جديد</h4>
+      <div class="row">
+        <label style="font-size:11px;text-align:right;margin-bottom:2px">1) اسم الزر</label>
+        <input type="text" id="dynBtnName" placeholder="مثال: 🧮 حساب الفاتورة" autocomplete="off">
+      </div>
+      <div class="row">
+        <label style="font-size:11px;text-align:right;margin-bottom:2px">2) اسم الملف</label>
+        <input type="text" id="dynBtnFile" placeholder="مثال: calculator.html" autocomplete="off">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <button class="big ok" id="confirmDynBtn">إضافة</button>
+        <button class="big danger" id="cancelDynBtn">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- رفع الملفات -->
+  <div class="card">
+    <div class="sec"><span>📁 رفع الملفات</span></div>
+    <p style="font-size:12.5px;color:var(--mu);text-align:center;margin:0 0 12px">Excel + PDF — يمكن رفع عدة ملفات معاً</p>
+
+    <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.csv" multiple style="padding:12px;height:auto;text-align:center">
+    <button class="big" id="processFilesBtn" style="margin-top:12px">📥 معالجة الملفات</button>
+    <div class="progress hidden" id="progBox"><div class="bar" id="progBar"></div></div>
+    <div id="filesStatus" class="fileInfo hidden"></div>
+  </div>
+
+  <!-- النتائج -->
+  <div id="resultsBox" class="hidden">
+    <div class="card">
+      <div class="sec"><span>📊 ملخص البيانات</span></div>
+      <div class="stat" id="statsBox"></div>
+    </div>
+    <div class="card">
+      <div class="sec"><span>👁️ معاينة (أول 20 صف)</span></div>
+      <div style="overflow-x:auto">
+        <table id="previewTable">
+          <thead><tr><th>#</th><th>قطاع</th><th>بلوك</th><th>عمارة</th><th>شقة</th><th>الاسم</th><th>العدد</th><th>القيمة</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec"><span>💾 التصدير</span></div>
+      <button class="big ok" id="exportAllBtn" style="margin-bottom:10px">📦 تنزيل data.json (كامل)</button>
+      <button class="big gold" id="exportEncBtn">🔐 تنزيل ملفات الأعضاء المشفّرة</button>
+      <div id="exportStatus" class="fileInfo hidden"></div>
+    </div>
+    <div class="card">
+      <div class="sec"><span>📋 سجل العمليات</span></div>
+      <div class="log" id="logBox"></div>
+    </div>
+  </div>
+
+  <!-- فك تشفير الأرشيف -->
+  <div class="card">
+    <div class="sec"><span>🔓 فك تشفير ملف أرشيف</span></div>
+    <p style="font-size:12.5px;color:var(--mu);text-align:center;margin:0 0 12px">ارفع ملف الأرشيف المشفَّر الذي أرسله لك العضو</p>
+    <input type="file" id="archiveFile" accept=".json,application/json" style="padding:12px;height:auto;text-align:center">
+    <button class="big gold" id="decArchiveBtn" style="margin-top:12px">🔓 فك التشفير</button>
+    <div id="archiveStatus" class="fileInfo hidden"></div>
+    <div id="archiveResult" style="margin-top:12px"></div>
+  </div>
+
+  <!-- تصفير -->
+  <div class="card">
+    <div class="sec"><span>⚙️ إعدادات متقدمة</span></div>
+    <button class="big danger" id="resetAllBtn" style="font-size:13px">🗑️ تصفير كامل (مسح كل شيء)</button>
+  </div>
+
+  <div class="devFooter">
+    <div class="dev-label">Developed by</div>
+    <div class="dev-name">Sherif Mohamed Nashaat Mohamed</div>
+  </div>
+</div>
+
+<!-- نافذة تعديل عضو -->
+<div id="editModal" class="modal hidden">
+  <div class="modalBox">
+    <h3>✏️ تعديل كلمة المرور</h3>
+    <div class="field"><label>اسم العضو</label><input type="text" id="editName" readonly></div>
+    <div class="field"><label>كلمة المرور الجديدة</label><input type="text" id="editPass" autocomplete="off"></div>
+    <div class="buttons">
+      <button class="btnCancel" id="editCancelBtn">إلغاء</button>
+      <button class="btnConfirm" id="editConfirmBtn">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- iframe للصفحات الديناميكية -->
+<div id="dynIframeView" class="hidden">
+  <div class="topBar">
+    <span class="title" id="dynIframeTitle">📄 صفحة</span>
+    <button class="closeBtn" id="dynIframeClose">✕ إغلاق</button>
+  </div>
+  <iframe id="dynIframe" src="" loading="lazy"></iframe>
+</div>
+
+<script src="/js/shared.js"></script>
+<script src="/js/admin.js"></script>
+
+</body>
+</html>
