@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Collection App",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Collection",
+  "start_url": "/",
+  "theme_color": "#0d4d4d",
+  "id": "com.engsherif74.collection",
+  "lang": "ar"
+}
