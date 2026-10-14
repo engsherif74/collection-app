@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>قراءة العداد</title>
+<style>body{font-family:'Segoe UI',Tahoma,sans-serif;margin:0;padding:1rem;color:#0c2233;background:#fff}.c{max-width:420px;margin:auto}h1{font-size:1.1rem}.mu{color:#5b6f7d;font-size:.9rem}input{width:100%;box-sizing:border-box;font:inherit;padding:.8rem;border:2px solid #d3dde4;border-radius:12px;margin:.3rem 0 .8rem;min-height:48px}button{font:inherit;font-weight:700;padding:.8rem 1.4rem;border:0;border-radius:12px;background:#0a6fb0;color:#fff;cursor:pointer;min-height:48px}button.g{background:none;color:#0a6fb0;border:2px solid #0a6fb0}ul{padding:0;list-style:none}li{padding:.5rem 0;border-bottom:1px solid #d3dde4}</style></head><body><div class="c">
+<h1 id="t">قراءة العداد</h1><p class="mu" id="w"></p><p class="mu" id="last"></p>
+<label>القراءة الحالية<input id="v" inputmode="decimal" autocomplete="off"></label><label>ملاحظة (اختياري)<input id="n" autocomplete="off"></label>
+<button id="s">حفظ القراءة</button> <button class="g" id="x">تصدير كل القراءات</button><ul id="l"></ul></div>
+<script>
+const p=new URLSearchParams(location.search),k=p.get('k')||'',KEY='collect-readings-v1',all=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}};
+const num=s=>String(s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+document.getElementById('w').textContent=`${p.get('n')||'بدون اسم'} · قطاع ${p.get('s')} · بلوك ${p.get('b')} · عمارة ${p.get('d')} · شقة ${p.get('a')}`;
+function draw(){const mine=all().filter(r=>r.k===k).reverse(),l=document.getElementById('l');l.innerHTML='';
+ document.getElementById('last').textContent=mine[0]?`آخر قراءة: ${mine[0].v} (${mine[0].t.slice(0,10)})`:'لا توجد قراءة سابقة';
+ mine.slice(0,10).forEach(r=>{const li=document.createElement('li');li.textContent=`${r.v} — ${r.t.slice(0,16).replace('T',' ')}${r.note?' — '+r.note:''}`;l.append(li);});}
+document.getElementById('s').onclick=()=>{const v=num(document.getElementById('v').value).trim();if(!v||isNaN(+v))return alert('اكتب قراءة صحيحة');
+ const a=all();a.push({k,name:p.get('n')||'',addr:`${p.get('s')}-${p.get('b')}-${p.get('d')}-${p.get('a')}`,v,note:document.getElementById('n').value,t:new Date().toISOString(),by:p.get('u')||''});
+ localStorage.setItem(KEY,JSON.stringify(a));document.getElementById('v').value='';document.getElementById('n').value='';draw();};
+document.getElementById('x').onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"',rows=[['العميل','العنوان','القراءة','ملاحظة','الوقت','المحصل'],...all().map(r=>[r.name,r.addr,r.v,r.note,r.t,r.by])];
+ const b=new Blob(['\uFEFF'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='القراءات.csv';a.click();};
+draw();
+</script></body></html>
