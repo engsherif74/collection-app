@@ -11,6 +11,10 @@ export async function pay(no,subs,adv){
     if(use)A.push([k,{key:k,balance:b-use}]);}
   await putMany('ledger',L);if(A.length)await putMany('advance',A);
 }
+export async function payPartial(no,s,count,amount){
+  const k=keyOf(s),id=uid(no),f=await get('meta','file');
+  await put('ledger',id,{id,no,type:'pay',partial:true,key:k,amount,due:amount,fromAdvance:0,out:!s.inRoute,count,cycle:f?.cycle,time:new Date().toISOString(),status:'temp'});
+}
 export async function addAdvance(no,s,amt){
   const k=keyOf(s),id=uid(no),b=(await get('advance',k))?.balance||0;
   await put('ledger',id,{id,no,type:'advance',key:k,amount:amt,count:0,time:new Date().toISOString(),status:'temp'});

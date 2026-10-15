@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاتورة</title>
+<style>
+@page{size:58mm auto;margin:2mm}
+body{font-family:'Segoe UI','Noto Sans Arabic',Tahoma,sans-serif;margin:0;padding:1rem;background:#fff;color:#000}
+.r{width:54mm;max-width:100%;margin:auto;font-weight:700;font-size:12px;line-height:1.7}
+.r h1{font-size:15px;text-align:center;margin:0 0 4px}
+.ln{padding:3px 0;word-break:break-word}.ln span{font-weight:600}
+.g{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;border-top:1px dashed #000;border-bottom:1px dashed #000;margin:6px 0;padding:4px 0}
+.g i{font-style:normal;font-weight:600;font-size:11px;display:block}.g b{font-size:15px;display:block}
+.w{margin:6px 0;border-top:1px dashed #000;padding-top:6px}
+.f{font-size:10px;font-weight:600;margin-top:6px;word-break:break-all}
+button{display:block;margin:1rem auto;padding:.8rem 2.2rem;font:inherit;font-weight:700;background:#0a6fb0;color:#fff;border:0;border-radius:12px;cursor:pointer}
+@media print{button{display:none}body{padding:0}}
+</style></head><body>
+<div class="r" id="r"></div><button onclick="print()">طباعة</button>
+<script>
+const p=new URLSearchParams(location.search),g=k=>p.get(k)||'',box=document.getElementById('r');
+const U=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],
+T=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'],
+H=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+function t3(n){const h=Math.floor(n/100),r=n%100,a=[];if(h)a.push(H[h]);if(r){if(r<20)a.push(U[r]);else{const u=r%10;a.push(u?U[u]+' و'+T[Math.floor(r/10)]:T[Math.floor(r/10)]);}}return a.join(' و');}
+function words(n){if(!n)return 'صفر';const m=Math.floor(n/1e6),th=Math.floor(n%1e6/1000),r=n%1000,a=[];
+ if(m)a.push(m===1?'مليون':m===2?'مليونان':(m<=10?t3(m)+' ملايين':t3(m)+' مليون'));
+ if(th)a.push(th===1?'ألف':th===2?'ألفان':(th<=10?t3(th)+' آلاف':t3(th)+' ألف'));
+ if(r)a.push(t3(r));return a.join(' و');}
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;};
+const line=(l,v)=>{if(!v)return;const d=el('div','ln');d.append(el('span','',l+' : '),document.createTextNode(v));box.append(d);};
+box.append(el('h1','','فاتورة'));
+const gd=el('div','g');[['قطاع',g('s')],['بلوك',g('b')],['عمارة',g('d')],['شقة',g('a')]].forEach(([l,v])=>{const c=el('div');c.append(el('i','',l),el('b','',v||'—'));gd.append(c);});box.append(gd);
+line('اسم العميل',g('n'));line('عدد الفواتير',g('c'));
+const due=+p.get('v')||0,paid=+p.get('p')||0,adv=+p.get('r')||0,fm=n=>n.toLocaleString('en-US');
+line('قيمة الفواتير',due?fm(due):'');
+if(adv>0){line('من الرصيد المقدم',fm(adv));line('المسدد نقداً',fm(paid));}
+if(due){const w=el('div','w'),i=Math.floor(due),q=Math.round((due-i)*100);w.textContent='فقط '+words(i)+' ج.م'+(q?' و'+words(q)+' قرش':'')+' لا غير';box.append(w);}
+line('شهر الإصدار',g('m'));
+const t=new Date(g('t'));if(!isNaN(t))line('تاريخ التحصيل',t.toLocaleString('ar-EG'));
+line('مسئول التحصيل',g('u'));
+if(g('id'))box.append(el('div','f','رقم العملية: '+g('id')));
+</script></body></html>

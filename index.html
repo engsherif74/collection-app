@@ -7,93 +7,23 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <title>محصّل الغاز</title>
-<style>
-  /* التنسيقات الأساسية والمدمجة */
-  :root {
-    --primary: #0c2233;
-    --accent: #f2a516;
-    --blue: #0a6fb0;
-    --bg: #f5f7fa;
-    --text: #333333;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-  body { background-color: var(--bg); color: var(--text); direction: rtl; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  
-  header.top { background-color: var(--primary); color: #fff; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
-  header.top div { display: flex; align-items: center; gap: 10px; width: 100%; }
-  header.top svg { width: 32px; height: 32px; }
-  header.top h1 { font-size: 1.1rem; font-weight: bold; }
-  header.top p { font-size: 0.8rem; color: #ccc; }
-  
-  .ico { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; padding: 4px; }
-  .pill { background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
-  
-  /* شريط تحميل الملفات */
-  .upd { background-color: var(--accent); color: var(--primary); padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.9rem; }
-  .btn { background-color: var(--blue); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-  .btn.sm { padding: 4px 10px; font-size: 0.8rem; background-color: var(--primary); }
-
-  main { flex: 1; overflow-y: auto; padding: 10px; }
-  
-  /* صف العميل والشقق الموحد في سطر واحد */
-  .client-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #fff; border-bottom: 1px solid #eee; gap: 8px; border-radius: 6px; margin-bottom: 6px; }
-  .client-info { display: flex; align-items: center; gap: 10px; flex: 1; font-size: 0.95rem; }
-  .client-info input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--blue); }
-  .apt-num { font-weight: bold; color: var(--primary); min-width: 45px; }
-  .client-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #222; }
-  
-  /* زر السداد يعرض القيمة مباشرة */
-  .pay-btn { background-color: var(--blue); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
-  .pay-btn.advance { background-color: var(--accent); color: var(--primary); }
-
-  /* شريط التنقل السفلي */
-  nav.tabs { display: flex; background: #fff; border-top: 1px solid #ddd; height: 55px; }
-  nav.tabs button { flex: 1; background: none; border: none; font-size: 0.85rem; font-weight: bold; color: #666; cursor: pointer; border-top: 3px solid transparent; }
-  nav.tabs button.on { color: var(--blue); border-top-color: var(--blue); background: #f0f4f8; }
-
-  .menu { position: absolute; top: 60px; right: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; width: 200px; }
-  #toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; z-index: 2000; display: none; }
-</style>
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/collector.css">
 </head>
 <body>
-
-<header class="top">
-  <div>
-    <button id="menuBtn" class="ico" aria-label="القائمة المنسدلة">⋮</button>
-    <button id="back" class="ico" hidden aria-label="رجوع">→</button>
-    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c3 9 14 13 14 26a14 14 0 0 1-28 0c0-6 3-9 6-12 0 5 3 7 5 7-2-8 0-15 3-21z" fill="#f2a516"/><path d="M24 24c2 4 7 6 7 12a7 7 0 0 1-14 0c0-4 4-6 7-12z" fill="#0a6fb0"/></svg>
-    <div>
-      <h1>محصّل الغاز</h1>
-      <p id="who">المحصل</p>
-    </div>
-    <span class="pill" id="net">متصل</span>
-    <button id="exitBtn" class="ico" aria-label="خروج" style="margin-right:auto; color:white;" title="خروج">⏻</button>
-  </div>
-</header>
-
-<!-- القائمة المنسدلة للواجهات الإضافية -->
+<header class="top"><div>
+  <button id="menuBtn" class="ico" aria-label="الواجهات الإضافية">⋮</button>
+  <button id="back" class="ico" hidden aria-label="رجوع">→</button>
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c3 9 14 13 14 26a14 14 0 0 1-28 0c0-6 3-9 6-12 0 5 3 7 5 7-2-8 0-15 3-21z" fill="#f2a516"/><path d="M24 24c2 4 7 6 7 12a7 7 0 0 1-14 0c0-4 4-6 7-12z" fill="#0a6fb0"/></svg>
+  <span><h1>محصّل الغاز</h1><p id="who">تسجيل الدخول</p></span><span class="pill" id="net">…</span><button id="exitBtn" class="ico" hidden aria-label="خروج" title="خروج">⏻</button>
+</div></header>
 <div id="menu" class="menu" hidden></div>
-
-<!-- شريط تحميل الملفات الجديد -->
-<div id="upd" class="upd" hidden>
-  <span>ملف جديد متاح</span>
-  <button class="btn sm" id="updBtn">حمّله</button>
-</div>
-
-<!-- الواجهة الرئيسية تفتح مباشرة على واجهة التحصيل -->
-<main id="app">
-  <section id="view"></section>
-</main>
-
-<nav class="tabs" id="tabs">
-  <button data-t="home" class="on">التحصيل</button>
-  <button data-t="ledger">ما تم تحصيله</button>
-  <button data-t="search">بحث</button>
-  <button data-t="archive">الأرشيف</button>
-  <button data-t="details">التفاصيل</button>
-</nav>
-
+<main id="lock" hidden><section class="card"><h2>الدخول لأول مرة</h2><p class="mute">اكتب الاسم ورقم الأداء وكلمة السر كما سجّلها لك الأدمن. تُدخَل مرة واحدة فقط، ثم تعمل بدون إنترنت.</p>
+<div class="stack"><label class="field"><span>الاسم (اختياري)</span><input id="name" autocomplete="off" placeholder="يُؤخذ تلقائياً من رقم الأداء"></label><label class="field"><span>رقم الأداء</span><input id="no" inputmode="numeric" autocomplete="off"></label><label class="field"><span>كلمة السر</span><input id="pw" type="password" autocomplete="off"></label></div>
+<div class="actions"><button class="btn" id="go">دخول وتحميل الملفات</button></div><p class="mute" id="msg"></p></section></main>
+<div id="upd" class="upd" hidden><span>ملف جديد متاح</span><button class="btn sm" id="updBtn">حمّله</button></div>
+<main id="locked" hidden><section class="card empty"><div class="actions" style="justify-content:center"><button class="btn" id="unlockBtn">فتح التطبيق</button></div><p class="mute" id="lmsg"></p><div class="actions" style="justify-content:center"><button class="btn ghost" id="relogin" hidden>تعذر الفتح؟ ادخل بكلمة السر</button></div></section></main>
+<main id="app" hidden><section id="view"></section></main>
+<nav class="tabs" id="tabs" hidden><button data-t="home" class="on">التحصيل</button><button data-t="ledger">ما تم تحصيله</button><button data-t="search">بحث</button><button data-t="archive">الأرشيف</button><button data-t="details">التفاصيل</button></nav>
 <div id="toast" role="status"></div>
 <script type="module" src="js/collector/app.js"></script>
-</body>
-</html>
+</body></html>
