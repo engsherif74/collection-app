@@ -7,78 +7,23 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <title>محصّل الغاز</title>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/collector.css">
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/collector.css">
 </head>
 <body>
-
 <header class="top"><div>
+  <button id="menuBtn" class="ico" aria-label="الواجهات الإضافية">⋮</button>
   <button id="back" class="ico" hidden aria-label="رجوع">→</button>
-  <svg viewBox="0 0 48 48" aria-hidden="true">
-    <path d="M24 3c3 9 14 13 14 26a14 14 0 0 1-28 0c0-6 3-9 6-12 0 5 3 7 5 7-2-8 0-15 3-21z" fill="#f2a516"/>
-    <path d="M24 24c2 4 7 6 7 12a7 7 0 0 1-14 0c0-4 4-6 7-12z" fill="#0a6fb0"/>
-  </svg>
-  <span>
-    <h1>محصّل الغاز</h1>
-    <p id="who">تسجيل الدخول</p>
-  </span>
-  <span class="pill" id="net">…</span>
-  <button id="menuBtn" class="ico" aria-label="القائمة">⋮</button>
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c3 9 14 13 14 26a14 14 0 0 1-28 0c0-6 3-9 6-12 0 5 3 7 5 7-2-8 0-15 3-21z" fill="#f2a516"/><path d="M24 24c2 4 7 6 7 12a7 7 0 0 1-14 0c0-4 4-6 7-12z" fill="#0a6fb0"/></svg>
+  <span><h1>محصّل الغاز</h1><p id="who">تسجيل الدخول</p></span><span class="pill" id="net">…</span><button id="exitBtn" class="ico" hidden aria-label="خروج" title="خروج">⏻</button>
 </div></header>
-
 <div id="menu" class="menu" hidden></div>
-
-<main id="lock" hidden>
-  <section class="card">
-    <h2>الدخول لأول مرة</h2>
-    <p class="mute">اكتب رقم الأداء وكلمة السر كما سجّلهما لك الأدمن. تُدخَل مرة واحدة فقط، ثم تعمل بدون إنترنت.</p>
-    <div class="stack">
-      <label class="field">
-        <span>رقم الأداء</span>
-        <input id="no" inputmode="numeric" autocomplete="off">
-      </label>
-      <label class="field">
-        <span>كلمة السر</span>
-        <input id="pw" type="password" autocomplete="off">
-      </label>
-    </div>
-    <div class="actions">
-      <button class="btn" id="go">دخول وتحميل الملفات</button>
-    </div>
-    <p class="mute" id="msg"></p>
-  </section>
-</main>
-
-<div id="upd" class="upd" hidden>
-  <span>ملف جديد متاح</span>
-  <button class="btn sm" id="updBtn">حمّله</button>
-</div>
-
-<main id="locked" hidden>
-  <section class="card empty">
-    <h2>🔒 التطبيق مقفل</h2>
-    <p class="mute">افتحه ببصمتك أو النقش أو كلمة مرور الجهاز.</p>
-    <div class="actions" style="justify-content:center">
-      <button class="btn" id="unlockBtn">فتح</button>
-      <button class="btn ghost" id="relogin">تعذر الفتح؟ ادخل بكلمة السر</button>
-    </div>
-    <p class="mute" id="lmsg"></p>
-  </section>
-</main>
-
+<main id="lock" hidden><section class="card"><h2>الدخول لأول مرة</h2><p class="mute">اكتب الاسم ورقم الأداء وكلمة السر كما سجّلها لك الأدمن. تُدخَل مرة واحدة فقط، ثم تعمل بدون إنترنت.</p>
+<div class="stack"><label class="field"><span>الاسم (اختياري)</span><input id="name" autocomplete="off" placeholder="يُؤخذ تلقائياً من رقم الأداء"></label><label class="field"><span>رقم الأداء</span><input id="no" inputmode="numeric" autocomplete="off"></label><label class="field"><span>كلمة السر</span><input id="pw" type="password" autocomplete="off"></label></div>
+<div class="actions"><button class="btn" id="go">دخول وتحميل الملفات</button></div><p class="mute" id="msg"></p></section></main>
+<div id="upd" class="upd" hidden><span>ملف جديد متاح</span><button class="btn sm" id="updBtn">حمّله</button></div>
+<main id="locked" hidden><section class="card empty"><div class="actions" style="justify-content:center"><button class="btn" id="unlockBtn">فتح التطبيق</button></div><p class="mute" id="lmsg"></p><div class="actions" style="justify-content:center"><button class="btn ghost" id="relogin" hidden>تعذر الفتح؟ ادخل بكلمة السر</button></div></section></main>
 <main id="app" hidden><section id="view"></section></main>
-
-<nav class="tabs" id="tabs" hidden>
-  <button data-t="home" class="on">التحصيل</button>
-  <button data-t="ledger">ما تم تحصيله</button>
-  <button data-t="search">بحث</button>
-  <button data-t="archive">الأرشيف</button>
-  <button data-t="details">التفاصيل</button>
-</nav>
-
+<nav class="tabs" id="tabs" hidden><button data-t="home" class="on">التحصيل</button><button data-t="ledger">ما تم تحصيله</button><button data-t="search">بحث</button><button data-t="archive">الأرشيف</button><button data-t="details">التفاصيل</button></nav>
 <div id="toast" role="status"></div>
-
 <script type="module" src="js/collector/app.js"></script>
-</body>
-</html>
+</body></html>
